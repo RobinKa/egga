@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "egga"
-version = "0.1.2"
+version = "0.1.3"
 description = "Symbolic Geometric Algebra with E-Graphs "
 authors = ["Robin Kahlow <tora@warlock.ai>"]
 readme = "README.md"
