@@ -4,7 +4,7 @@ base-python:
     FROM python:3.8
 
     # Install Poetry
-    ENV PIP_CACHE_DIR /var/cache/buildkit/pip
+    ENV PIP_CACHE_DIR /pip-cache
     RUN --mount=type=cache,target=$PIP_CACHE_DIR \
         pip install poetry==1.6.1
     RUN --mount=type=cache,target=$PIP_CACHE_DIR \
@@ -53,8 +53,13 @@ test-examples:
     END
 
 publish:
+    FROM +build
+
+    RUN poetry config repositories.pypi https://upload.pypi.org/legacy/
+    RUN poetry config repositories.testpypi https://test.pypi.org/legacy/
+
     RUN --mount=type=cache,target=$PIP_CACHE_DIR \
-    --secret PYPI_TOKEN=+secrets/PYPI_TOKEN \
-    poetry publish \
-        --build --skip-existing -r $REPOSITORY \
-        -u __token__ -p $PYPI_TOKEN
+        --secret PYPI_TOKEN=+secrets/PYPI_TOKEN \
+        poetry publish \
+            --build --skip-existing -r $REPOSITORY \
+            -u __token__ -p $PYPI_TOKEN
