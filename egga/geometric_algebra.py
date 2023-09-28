@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
 from itertools import combinations
-from typing import Type
+from typing import Dict, Optional, Type, Tuple
 
 from egglog import (
     BaseExpr,
@@ -44,7 +44,7 @@ class GeometricAlgebra:
     egraph: EGraph
     expr_cls: Type[Expression]
     rulesets: GeometricAlgebraRulesets
-    signature: tuple[float]
+    signature: Tuple[float]
 
     @property
     def basis_vectors(self):
@@ -56,10 +56,10 @@ class GeometricAlgebra:
 
     def __init__(
         self,
-        signature: tuple[float],
+        signature: Tuple[float],
         symplectic=False,
         eq_solve=False,
-        costs: dict[str, int] | None = None,
+        costs: Optional[Dict[str, int]] = None,
     ):
         if costs is None:
             costs = {}
