@@ -94,8 +94,6 @@ assert check_equality(ga, lhs, rhs)
 ```
 
 The [/examples](examples) as well as the [/tests](tests) directories contain more examples.
-The [/experimental_examples](experimental_examples) directory has more examples but are not tested as part
-of continuous integration, so they can be outdated or broken.
 
 ## List of expressions
 
@@ -134,8 +132,8 @@ of continuous integration, so they can be outdated or broken.
 | `mix_grades(x_1, x_2)`   | Represents the mixture of two grades. If the grades of x_1 and x_2 are the same, this will be simplified to `grade(x_1)`. |
 | `select_grade(x_1, x_2)` | Selects the grade x_2 part of x_1                                                                                         |
 | `abs(x)`                 | Absolute value of x                                                                                                       |
-| `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_1) * x_2)`                                                             |
-| `sandwich(x_1, x_2)`     | Shorthand for `x_1 * x_2 * ~x_1`                                                                                          |
+| `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                                             |
+| `sandwich(x_1, x_2)`     | Shorthand for `x_2 * x_1 * ~x_2`                                                                                          |
 | `diff(x_1, x_2)`         | Derivative of x_1 with respect to x_2                                                                                     |
 
 ### Unsupported but exists, might or might not work

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, Union
+from typing import Callable, Literal, Optional, Union
 
 from egglog import Fact, egraph, eq, run
 
@@ -20,7 +20,7 @@ def run_ruleset(ga: GeometricAlgebra, options: RunRulesetOptions = RunRulesetOpt
     else:
         ruleset = options.ruleset
 
-    ga.egraph.run(
+    return ga.egraph.run(
         run(
             ruleset,
             options.limit,
@@ -33,8 +33,9 @@ def run_ruleset(ga: GeometricAlgebra, options: RunRulesetOptions = RunRulesetOpt
 class RunScheduledOptions:
     limit: int = 10
     full_interval: int = 4
-    fast_count: int = 4
+    fast_count: int = 1
     until: Optional[Fact] = None
+    on_step: Optional[Callable] = None
 
 
 def run_scheduled(
@@ -53,6 +54,10 @@ def run_scheduled(
         # Fast step
         do_step(ruleset=ga.rulesets.fast, step_limit=options.fast_count)
 
+        if options.on_step is not None:
+            if options.on_step():
+                break
+
         # Medium or full step
         do_step(
             ruleset=ga.rulesets.full
@@ -60,6 +65,11 @@ def run_scheduled(
             else ga.rulesets.medium,
             step_limit=1,
         )
+
+        if options.on_step is not None:
+            if options.on_step():
+                break
+
         step += 1
 
 
@@ -88,6 +98,7 @@ class CheckEqualityOptions:
     full_interval: int = 4
     fast_count: int = 4
     equal: bool = True
+    on_step: Optional[Callable] = None
 
 
 def check_equality(
@@ -111,6 +122,7 @@ def check_equality(
             full_interval=options.full_interval,
             fast_count=options.fast_count,
             until=predicate if options.equal else None,
+            on_step=options.on_step,
         ),
     )
     check_fn = ga.egraph.check if options.equal else ga.egraph.check_fail
