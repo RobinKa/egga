@@ -306,6 +306,9 @@ e_123 = e_1 * e_2 * e_3
             E.scalar_literal(1.5) * e_1 + E.scalar_literal(-0.1) * e_1,
             E.scalar_literal(1.4) * e_1,
         ),
+        (
+            E.grade(e_0 * e_1 * e_2 * e_3 * e_4), E.scalar_literal(5.0),
+        )
     ],
 )
 def test_rules(equation):

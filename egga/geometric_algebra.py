@@ -492,7 +492,7 @@ class GeometricAlgebra:
             )
 
             # Basis blade grades
-            for blade_grade in range(1, len(signature)):
+            for blade_grade in range(1, len(signature) + 1):
                 basis_blade = None
                 basis_vector_names = [var(f"s_{i}", String) for i in range(blade_grade)]
                 basis_vectors = [e(name) for name in basis_vector_names]
