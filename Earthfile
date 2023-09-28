@@ -55,6 +55,8 @@ test-examples:
 publish:
     FROM +build
 
+    ARG --required REPOSITORY
+
     RUN poetry config repositories.pypi https://upload.pypi.org/legacy/
     RUN poetry config repositories.testpypi https://test.pypi.org/legacy/
 

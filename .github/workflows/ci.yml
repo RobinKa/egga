@@ -15,7 +15,7 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: earthly/actions-setup@v1
@@ -37,6 +37,7 @@ jobs:
         run: earthly +test-examples
   publish:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: earthly/actions-setup@v1
         with:
