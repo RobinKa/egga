@@ -31,6 +31,13 @@ from egga.expression import Expression
 
 birewrite = egraph.birewrite
 
+def _close(a: f64Like, b: f64Like, eps: float = 1e-3):
+    diff = a - b
+    return diff * diff < eps * eps
+
+def _not_close(a: f64Like, b: f64Like, eps: float = 1e-3):
+    diff = a - b
+    return diff * diff >= eps * eps
 
 @dataclass
 class GeometricAlgebraRulesets:
@@ -420,6 +427,9 @@ class GeometricAlgebra:
                     birewrite(scalar_variable(s_1)).to(scalar(scalar_variable(s_1))),
                     birewrite(scalar_variable(s_1)).to(scalar(variable(s_1))),
                     rewrite(scalar_variable(s_1)).to(variable(s_1)),
+                    # -0 is 0 (apparently not true for f64)
+                    union(scalar_literal(-0.0)).with_(scalar_literal(0.0)),
+                    union(-scalar_literal(0.0)).with_(scalar_literal(0.0)),
                     # Scalar
                     rewrite(scalar(x_1) + scalar(x_2)).to(scalar(x_1 + x_2)),
                     rewrite(scalar(x_1) - scalar(x_2)).to(scalar(x_1 - x_2)),
@@ -438,7 +448,7 @@ class GeometricAlgebra:
                         scalar_literal(f_1 * f_2)
                     ),
                     rewrite(scalar_literal(f_1) / scalar_literal(f_2)).to(
-                        scalar_literal(f_1 / f_2), f_2 != 0.0
+                        scalar_literal(f_1 / f_2), _not_close(f_2, 0.0)
                     ),
                     # Scalar literal - abs
                     rewrite(abs_(scalar_literal(f_1))).to(
@@ -474,7 +484,9 @@ class GeometricAlgebra:
                 # rule(eq(x_2).to(grade(scalar(x_1)))).then(
                 #     x_1 != scalar_literal(0.0)
                 # ),
-                rewrite(grade(scalar_literal(f_1))).to(scalar_literal(0.0), f_1 != 0.0),
+                rewrite(grade(scalar_literal(f_1))).to(
+                    scalar_literal(0.0), _not_close(f_1, 0.0)
+                ),
                 # grade(a + b) -> mix_grades(grade(a), grade(b)), if a + b is not zero
                 # rule(eq(x_1).to(grade(x_2 + x_3))).then(
                 #     x_2 + x_3 != scalar_literal(0.0)
@@ -488,7 +500,9 @@ class GeometricAlgebra:
                 # rule(eq(x_1).to(scalar(x_2) * x_3)).then(
                 #     x_2 != scalar_literal(0.0)
                 # ),
-                rewrite(grade(scalar_literal(f_1) * x_2)).to(grade(x_2), f_1 != 0.0),
+                rewrite(grade(scalar_literal(f_1) * x_2)).to(
+                    grade(x_2), _not_close(f_1, 0.0)
+                ),
             )
 
             # Basis blade grades
@@ -517,12 +531,10 @@ class GeometricAlgebra:
                     select_grade(x_1, x_3) + select_grade(x_2, x_3)
                 ),
                 # select_grade(x, y) -> 0 if grade(x) != y
-                rule(
-                    eq(x_2).to(select_grade(x_1, scalar_literal(f_1))),
+                rewrite(select_grade(x_1, scalar_literal(f_1))).to(
+                    scalar_literal(0.0),
                     eq(grade(x_1)).to(scalar_literal(f_2)),
-                    f_1 != f_2,
-                ).then(
-                    set_(select_grade(x_1, scalar_literal(f_1))).to(scalar_literal(0.0))
+                    _not_close(f_1, f_2),
                 ),
                 # select_grade(x, y) -> x if grade(x) == y
                 rule(eq(x_3).to(select_grade(x_1, scalar_literal(f_1)))).then(

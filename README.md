@@ -56,11 +56,9 @@ from egglog import union
 from egga.geometric_algebra import GeometricAlgebra
 from egga.utils import simplify
 
-# Pass eq_solve=True to enable the equation solving rules
-ga = GeometricAlgebra(
-    signature=[1.0, 1.0],
-    eq_solve=True,
-)
+# Pass eq_solve=True to enable the equation solving rules.
+# Add a cost to variable to it gets rewritten to something else.
+ga = GeometricAlgebra(signature=[1.0, 1.0], eq_solve=True, costs={"variable": 1_000})
 
 e_0, e_1 = ga.basis_vectors
 e_01 = e_0 * e_1
@@ -113,28 +111,28 @@ The [/examples](examples) as well as the [/tests](tests) directories contain mor
 
 ### Functions
 
-| Code                     | Description                                                                                                               |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `inverse(x)`             | Right-multiplicative inverse of x                                                                                         |
-| `scalar(x)`              | Mark x as a scalar                                                                                                        |
-| `scalar_literal(f)`      | Create a scalar constant                                                                                                  |
-| `scalar_variable(s)`     | Create a scalar variable                                                                                                  |
-| `e(s)`                   | Basis vector                                                                                                              |
-| `e2(s1, s2)`             | Basis bivector                                                                                                            |
-| `e3(s1, s2, s3)`         | Basis trivector                                                                                                           |
-| `variable(s)`            | Create a variable                                                                                                         |
-| `cos(x)`                 | Cos of x                                                                                                                  |
-| `sin(x)`                 | Sin of x                                                                                                                  |
-| `cosh(x)`                | Cosh of x                                                                                                                 |
-| `sinh(x)`                | Sinh of x                                                                                                                 |
-| `exp(x)`                 | Exponential function of x                                                                                                 |
-| `grade(x)`               | Grade of x                                                                                                                |
-| `mix_grades(x_1, x_2)`   | Represents the mixture of two grades. If the grades of x_1 and x_2 are the same, this will be simplified to `grade(x_1)`. |
-| `select_grade(x_1, x_2)` | Selects the grade x_2 part of x_1                                                                                         |
-| `abs(x)`                 | Absolute value of x                                                                                                       |
-| `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                                             |
-| `sandwich(x_1, x_2)`     | Shorthand for `x_1 * x_2 * ~x_1`                                                                                          |
-| `diff(x_1, x_2)`         | Derivative of x_1 with respect to x_2                                                                                     |
+| Code                     | Description                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `inverse(x)`             | Right-multiplicative inverse of x                                                                    |
+| `scalar(x)`              | Mark x as a scalar                                                                                   |
+| `scalar_literal(f)`      | Create a scalar constant                                                                             |
+| `scalar_variable(s)`     | Create a scalar variable                                                                             |
+| `e(s)`                   | Basis vector                                                                                         |
+| `e2(s_1, s_2)`           | Basis bivector                                                                                       |
+| `e3(s_1, s_2, s_3)`      | Basis trivector                                                                                      |
+| `variable(s)`            | Create a variable                                                                                    |
+| `cos(x)`                 | Cos of x                                                                                             |
+| `sin(x)`                 | Sin of x                                                                                             |
+| `cosh(x)`                | Cosh of x                                                                                            |
+| `sinh(x)`                | Sinh of x                                                                                            |
+| `exp(x)`                 | Exponential function of x                                                                            |
+| `grade(x)`               | Grade of x                                                                                           |
+| `mix_grades(x_1, x_2)`   | Represents the mixture of two grades. If x_1 and x_2 are the same, this will be simplified to `x_1`. |
+| `select_grade(x_1, x_2)` | Selects the grade x_2 part of x_1                                                                    |
+| `abs(x)`                 | Absolute value of x                                                                                  |
+| `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                        |
+| `sandwich(x_1, x_2)`     | Shorthand for `x_1 * x_2 * ~x_1`                                                                     |
+| `diff(x_1, x_2)`         | Derivative of x_1 with respect to x_2                                                                |
 
 ### Unsupported but exists, might or might not work
 
