@@ -16,8 +16,8 @@ rotor = E.rotor(e_01, phi)
 expr = E.diff(rotor, phi)
 
 
-# Wait for user input at each step to proceed, print the
-# current simplificiation and optionally render the egraph to pdf.
+# print the current simplificiation at each step, and optionally wait for user
+# input and render the egraph to pdf.
 # Here are the unique outputs this will print over time:
 # diff(rotor((e("0") * e("1")), scalar_variable("phi")), scalar_variable("phi"))
 # diff(rotor(e2("0", "1"), variable("phi")), variable("phi"))
@@ -27,7 +27,7 @@ expr = E.diff(rotor, phi)
 def on_step():
     print("Simplified:", ga.egraph.extract(expr))
     # ga.egraph.graphviz.render("render", quiet=True)
-    input()
+    # input()
 
 
 # The fast simplification ruleset makes this hang eventually,

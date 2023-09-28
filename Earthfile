@@ -48,7 +48,7 @@ test-examples:
 
     # Run examples
     COPY --dir examples .
-    FOR example IN $(ls examples/**/*.py)
+    FOR example IN $(ls examples/*.py)
         RUN poetry run python "$example"
     END
 
