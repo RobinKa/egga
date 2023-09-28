@@ -1,5 +1,7 @@
 # E-Graph Geometric Algebra (EGGA)
 
+[![PyPI](https://badge.fury.io/py/egga.svg)](https://badge.fury.io/py/egga)
+
 Symbolic [Geometric Algebra](https://en.wikipedia.org/wiki/Geometric_algebra) with [E-Graphs](https://egraphs-good.github.io/)
 
 Things you can do with this library
