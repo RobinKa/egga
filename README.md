@@ -133,7 +133,7 @@ The [/examples](examples) as well as the [/tests](tests) directories contain mor
 | `select_grade(x_1, x_2)` | Selects the grade x_2 part of x_1                                                                                         |
 | `abs(x)`                 | Absolute value of x                                                                                                       |
 | `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                                             |
-| `sandwich(x_1, x_2)`     | Shorthand for `x_2 * x_1 * ~x_2`                                                                                          |
+| `sandwich(x_1, x_2)`     | Shorthand for `x_1 * x_2 * ~x_1`                                                                                          |
 | `diff(x_1, x_2)`         | Derivative of x_1 with respect to x_2                                                                                     |
 
 ### Unsupported but exists, might or might not work
