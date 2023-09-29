@@ -432,6 +432,8 @@ class GeometricAlgebra:
                 ),
                 # Euler's formula etc. require adding B^2 so the rule can get matched.
                 rule(eq(x_2).to(exp(x_1))).then(x_1 * x_1),
+                # exp(x) ** f is exp(f x)
+                birewrite(exp(x_1) ** scalar(x_2)).to(exp(scalar(x_2) * x_1)),
             )
 
         def register_scalar(medium=True):
