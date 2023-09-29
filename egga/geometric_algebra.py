@@ -78,36 +78,47 @@ class GeometricAlgebra:
 
         @egraph.class_
         class MathExpr(BaseExpr):
+            @egraph.method(cost=costs.get("equal"))
             def equal(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("not_equal"))
             def not_equal(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__add__"))
             def __add__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__sub__"))
             def __sub__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__mul__"))
             def __mul__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__neg__"))
             def __neg__(self) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__invert__"))
             def __invert__(self) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__pow__"))
             def __pow__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__truediv__"))
             def __truediv__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__xor__"))
             def __xor__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__or__"))
             def __or__(self, other: MathExpr) -> MathExpr:
                 ...
 
