@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
 from itertools import combinations
-from typing import Dict, Optional, Type, Tuple
+from typing import Dict, Optional, Tuple, Type
 
 from egglog import (
     BaseExpr,
@@ -31,13 +31,16 @@ from egga.expression import Expression
 
 birewrite = egraph.birewrite
 
+
 def _close(a: f64Like, b: f64Like, eps: float = 1e-3):
     diff = a - b
     return diff * diff < eps * eps
 
+
 def _not_close(a: f64Like, b: f64Like, eps: float = 1e-3):
     diff = a - b
     return diff * diff >= eps * eps
+
 
 @dataclass
 class GeometricAlgebraRulesets:
@@ -493,7 +496,7 @@ class GeometricAlgebra:
                 # ),
                 rewrite(grade(x_1 + x_2)).to(
                     mix_grades(grade(x_1), grade(x_2)),
-                    # x_1 + x_2 != scalar_literal(0.0),
+                    x_1 + x_2 != scalar_literal(0.0),
                 ),
                 # grade(s * x) -> grade(x) if s != 0
                 # With scalar coef, if scalar coef is not zero
