@@ -434,6 +434,13 @@ class GeometricAlgebra:
                 rule(eq(x_2).to(exp(x_1))).then(x_1 * x_1),
                 # exp(x) ** f is exp(f x)
                 birewrite(exp(x_1) ** scalar(x_2)).to(exp(scalar(x_2) * x_1)),
+                # exp(x) * exp(y) -> exp(x + y) if [x, y] = 0
+                rule(eq(x_3).to(exp(x_1) * exp(x_2))).then(x_1 * x_2, x_2 * x_1),
+                rewrite(exp(x_1) * exp(x_2)).to(
+                    exp(x_1 + x_2), eq(x_1 * x_2).to(x_2 * x_1)
+                ),
+                # TODO: Add more general BCH case, might require adding (infinite) sum
+                # exp(x) * exp(y) = exp(X + Y + [X, Y]/2 + [X, [X, Y]]/12 + ...)
             )
 
         def register_scalar(medium=True):
