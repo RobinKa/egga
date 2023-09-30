@@ -754,6 +754,8 @@ class GeometricAlgebra:
                 rewrite(diff(sinh(x_1), x_2)).to(cosh(x_1) * diff(x_1, x_2)),
                 # cosh(x)
                 rewrite(diff(cosh(x_1), x_2)).to(sinh(x_1) * diff(x_1, x_2)),
+                # exp(x)
+                rewrite(diff(exp(x_1), x_2)).to(exp(x_1) * diff(x_1, x_2)),
                 # reverse
                 rewrite(diff(~x_1, x_2)).to(~diff(x_1, x_2)),
                 # negative
