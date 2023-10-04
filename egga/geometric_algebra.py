@@ -6,8 +6,8 @@ from itertools import combinations
 from typing import Dict, Optional, Tuple, Type
 
 from egglog import (
-    BaseExpr,
     EGraph,
+    Expr,
     String,
     StringLike,
     egraph,
@@ -77,7 +77,7 @@ class GeometricAlgebra:
         egraph = EGraph()
 
         @egraph.class_
-        class MathExpr(BaseExpr):
+        class MathExpr(Expr):
             @egraph.method(cost=costs.get("equal"))
             def equal(self, other: MathExpr) -> MathExpr:
                 ...
@@ -676,10 +676,10 @@ class GeometricAlgebra:
                 birewrite(x_1.equal(x_2)).to(x_2.equal(x_1)),
                 birewrite(x_1.not_equal(x_2)).to(x_2.not_equal(x_1)),
                 # Eq / Ne
-                rewrite(x_1.equal(x_1)).to(boolean(True)),
-                rewrite(x_1.not_equal(x_1)).to(boolean(False)),
-                rewrite(x_1.equal(x_2)).to(boolean(False), x_1 != x_2),
-                rewrite(x_1.not_equal(x_2)).to(boolean(True), x_1 != x_2),
+                rewrite(x_1.equal(x_1)).to(boolean(1)),
+                rewrite(x_1.not_equal(x_1)).to(boolean(0)),
+                rewrite(x_1.equal(x_2)).to(boolean(0), x_1 != x_2),
+                rewrite(x_1.not_equal(x_2)).to(boolean(1), x_1 != x_2),
             )
 
         def register_trigonometry():

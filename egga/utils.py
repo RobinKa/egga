@@ -20,13 +20,13 @@ def run_ruleset(ga: GeometricAlgebra, options: RunRulesetOptions = RunRulesetOpt
     else:
         ruleset = options.ruleset
 
-    return ga.egraph.run(
-        run(
-            ruleset,
-            options.limit,
-            *([options.until] if options.until is not None else []),
-        ).saturate()
-    )
+    for _ in range(options.limit):
+        ga.egraph.run(
+            run(
+                ruleset,
+                *([options.until] if options.until is not None else []),
+            ).saturate()
+        )
 
 
 @dataclass

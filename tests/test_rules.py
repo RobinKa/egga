@@ -40,10 +40,10 @@ test_equations: List[
     (e_1 * ~(e_12 + e_23 + e_31), -e_2 - e_123 + e_3),
     (e_23 ** E.scalar_literal(1.0), e_23),
     (e_23 * e_23, E.scalar_literal(-1.0)),
-    (e_1.equal(E.scalar_literal(1.0) * e_1), E.boolean(True)),
-    (e_1.not_equal(E.scalar_literal(1.0) * e_1), E.boolean(False)),
-    (e_1.equal(-E.scalar_literal(1.0) * e_1), E.boolean(False)),
-    (e_1.not_equal(-E.scalar_literal(1.0) * e_1), E.boolean(True)),
+    (e_1.equal(E.scalar_literal(1.0) * e_1), E.boolean(1)),
+    (e_1.not_equal(E.scalar_literal(1.0) * e_1), E.boolean(0)),
+    (e_1.equal(-E.scalar_literal(1.0) * e_1), E.boolean(0)),
+    (e_1.not_equal(-E.scalar_literal(1.0) * e_1), E.boolean(1)),
     (E.inverse(e_1), e_1),
     (E.inverse(e_12), -e_12),
     (E.scalar_literal(1.0) / e_12, -e_12),
@@ -359,7 +359,7 @@ def test_equalities(equation):
     ga.egraph.pop()
 
     if caught is not None:
-        raise caught
+        raise caught from caught
 
 
 @pytest.mark.skip
@@ -393,4 +393,4 @@ def test_contradiction(equations):
     ga.egraph.pop()
 
     if caught is not None:
-        raise caught
+        raise caught from caught
