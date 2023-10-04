@@ -384,47 +384,50 @@ class GeometricAlgebra:
             if full_inverse:
                 dims = len(signature)
 
-                if dims > 5:
-                    # # Shirokov inverse https://arxiv.org/abs/2005.04015 Theorem 4
-                    n = 2 ** ((dims + 1) // 2)
-                    u = x_1
-                    for k in range(1, n):
-                        c = scalar_literal(n / k) * select_grade(u, scalar_literal(0.0))
-                        u_minus_c = u - c
-                        u = x_1 * u_minus_c
+                # TODO: 5 dim case of Hitzer inverse gives contradictions?
+                # if dims > 5:
+                #if dims > 4:
 
-                        # As soon as u is a scalar, we can calculate an inverse
-                        # TODO: might be missing some scalar factors on early
-                        # termination
-                        egraph.register(
-                            rule(eq(x_2).to(inverse(x_1))).then(u),
-                            rewrite(inverse(x_1)).to(
-                                u_minus_c * scalar_literal(f64(1.0) / f_1),
-                                eq(u).to(scalar_literal(f_1)),
-                                _not_close(f_1, 0.0),
-                            ),
-                        )
+                # # Shirokov inverse https://arxiv.org/abs/2005.04015 Theorem 4
+                n = 2 ** ((dims + 1) // 2)
+                u = x_1
+                for k in range(1, n):
+                    c = scalar_literal(n / k) * select_grade(u, scalar_literal(0.0))
+                    u_minus_c = u - c
+                    u = x_1 * u_minus_c
 
-                    """
-                    - Example
-                    dims = 2
-                    n = 2
-                    u = e_1 + e_2
-                    
-                    -- Iter k=1
-                    c = 0
-                    u_minus_c = e_1 + e_2
-                    u = (e_1 + e_2) * (e_1 + e_2) = 2
+                # As soon as u is a scalar, we can calculate an inverse
+                # TODO: might be missing some scalar factors on early
+                # termination
+                egraph.register(
+                    rule(eq(x_2).to(inverse(x_1))).then(u),
+                    rewrite(inverse(x_1)).to(
+                        u_minus_c * scalar_literal(f64(1.0) / f_1),
+                        eq(u).to(scalar_literal(f_1)),
+                        _not_close(f_1, 0.0),
+                    ),
+                )
 
-                    -- Result
-                    inv = (e_1 + e_2) / 2
-                    """
-                else:
-                    # Closed form inverses (https://dx.doi.org/10.1016/j.amc.2017.05.027)
-                    # More optimized forms from clifford (https://github.com/pygae/clifford).
-                    # TODO: Might be able to pick lower dimension ones depending
-                    # on which basis vectors are present?
+                """
+                - Example
+                dims = 2
+                n = 2
+                u = e_1 + e_2
+                
+                -- Iter k=1
+                c = 0
+                u_minus_c = e_1 + e_2
+                u = (e_1 + e_2) * (e_1 + e_2) = 2
 
+                -- Result
+                inv = u_minus_c / u = (e_1 + e_2) / 2
+                """
+                #else:
+                # Closed form inverses (https://dx.doi.org/10.1016/j.amc.2017.05.027)
+                # More optimized forms from clifford (https://github.com/pygae/clifford).
+                # TODO: Might be able to pick lower dimension ones depending
+                # on which basis vectors are present?
+                for dims in range(len(signature) + 1):
                     x_1_conj = clifford_conjugation(x_1)
                     x_1_x_1_conj = x_1 * x_1_conj
                     x_1_conj_rev_x_1_x_1_conj = x_1_conj * ~x_1_x_1_conj
@@ -435,13 +438,15 @@ class GeometricAlgebra:
                     elif dims == 1:
                         numerator = grade_involution(x_1)
                     elif dims == 2:
-                        numerator = clifford_conjugation(x_1)
+                        numerator = x_1_conj
                     elif dims == 3:
                         numerator = x_1_conj * ~x_1_x_1_conj
                     elif dims == 4:
                         numerator = x_1_conj * (
                             x_1_x_1_conj
                             - scalar_literal(2.0)
+                            # Invert sign of grade 3 and 4 parts
+                            # TODO: is there a more efficient way?
                             * (
                                 select_grade(x_1_x_1_conj, scalar_literal(3.0))
                                 + select_grade(x_1_x_1_conj, scalar_literal(4.0))
@@ -451,19 +456,23 @@ class GeometricAlgebra:
                         numerator = x_1_conj_rev_x_1_x_1_conj * (
                             x_1_x_1_conj_rev_x_1_x_1_conj
                             - scalar_literal(2.0)
+                            # Invert sign of grade 1 and 4 parts
+                            # TODO: is there a more efficient way?
                             * (
                                 select_grade(
-                                    x_1_x_1_conj_rev_x_1_x_1_conj, scalar_literal(1.0)
+                                    x_1_x_1_conj_rev_x_1_x_1_conj,
+                                    scalar_literal(1.0),
                                 )
                                 + select_grade(
-                                    x_1_x_1_conj_rev_x_1_x_1_conj, scalar_literal(4.0)
+                                    x_1_x_1_conj_rev_x_1_x_1_conj,
+                                    scalar_literal(4.0),
                                 )
                             )
                         )
                     else:
                         raise NotImplementedError("Unreachable")
 
-                    denominator = select_grade(x_1 * numerator, scalar_literal(0.0))
+                    denominator = x_1 * numerator
 
                     egraph.register(
                         rule(eq(x_2).to(inverse(x_1))).then(denominator),
@@ -681,6 +690,20 @@ class GeometricAlgebra:
                 ),
                 # Sandwich
                 rewrite(sandwich(x_1, x_2)).to(x_1 * x_2 * ~x_1),
+                # # (e_i + e_j)^2 = e_i^2 + e_j^2
+                birewrite((e(s_1) + e(s_2)) ** scalar_literal(2.0)).to(
+                    e(s_1) ** scalar_literal(2.0) + e(s_2) ** scalar_literal(2.0),
+                    s_1 != s_2,
+                ),
+                # (a + b)^2 = a^2 + ab + ba + b^2
+                # birewrite((x_1 + x_2) * (x_1 + x_2)).to(
+                #     x_1 * x_1 + x_1 * x_2 + x_2 * x_1 + x_2 * x_2
+                # ),
+                # rule((x_1 + x_2) * (x_1 + x_2)).then(x_1 * x_2, x_2 * x_1),
+                # birewrite((x_1 + x_2) * (x_1 + x_2)).to(
+                #     x_1 * x_1 + x_2 * x_2,
+                #     eq(x_1 * x_2).to(-x_2 * x_1),
+                # ),
             )
 
             if medium:
