@@ -313,6 +313,10 @@ test_equations: List[
         E.grade(e_0 * e_1 * e_2 * e_3 * e_4),
         E.scalar_literal(5.0),
     ),
+    (
+        E.exp(e_12 * E.scalar_literal(2.0)) * E.exp(e_12 * E.scalar_literal(3.0)),
+        E.exp(e_12 * E.scalar_literal(5.0)),
+    ),
 ]
 
 

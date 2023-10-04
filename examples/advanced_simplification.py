@@ -19,24 +19,28 @@ expr = E.diff(rotor, phi)
 # print the current simplificiation at each step, and optionally wait for user
 # input and render the egraph to pdf.
 # Here are the unique outputs this will print over time:
-# diff(rotor((e("0") * e("1")), scalar_variable("phi")), scalar_variable("phi"))
-# diff(rotor(e2("0", "1"), variable("phi")), variable("phi"))
 # diff(rotor(e2("0", "1"), scalar_variable("phi")), scalar_variable("phi"))
-# (sinh((scalar_literal(0.5) * scalar_variable("phi"))) * scalar_literal(0.5)) - ((e2("0", "1") * cosh((scalar_literal(0.5) * scalar_variable("phi")))) * scalar_literal(0.5))
-# rotor(e2("0", "1"), scalar_variable("phi")) * (e2("1", "0") * scalar_literal(0.5))
+# rotor(e2("0", "1"), variable("phi")) * (
+#     ((scalar_literal(0.0) * e("1")) * (variable("phi") * scalar_literal(-0.5)))
+#     + (e2("0", "1") * ((scalar_literal(1.0) * scalar_literal(-0.5)) + (variable("phi") * scalar_literal(0.0))))
+# )
+# (rotor(e2("0", "1"), variable("phi")) * scalar_literal(0.5)) * e2("1", "0")
 def on_step():
     print("Simplified:", ga.egraph.extract(expr))
     # ga.egraph.graphviz.render("render", quiet=True)
     # input()
 
 
-# The fast simplification ruleset makes this hang eventually,
-# so disable it. With 15 steps this hangs, with 14 it seems okay.
-# These options are figured out by trial and error.
+# With 6 steps this hangs, with 5 it seems okay.
+# Options are figured out by trial and error:
+# - limits (how many iterations to run)
+# - fast_count: how many fast ruleset steps to run per iteration
+# - full_interval: run the full ruleset every full_interval iterations,
+#                  otherwise the medium ruleset will run which is a subset
 simplified = simplify(
     ga,
     expr,
-    options=RunScheduledOptions(on_step=on_step, fast_count=0, limit=14),
+    options=RunScheduledOptions(on_step=on_step, limit=5),
 )
 
 print(

@@ -6,8 +6,8 @@ from itertools import combinations
 from typing import Dict, Optional, Tuple, Type
 
 from egglog import (
-    Expr,
     EGraph,
+    Expr,
     String,
     StringLike,
     egraph,
@@ -78,36 +78,47 @@ class GeometricAlgebra:
 
         @egraph.class_
         class MathExpr(Expr):
+            @egraph.method(cost=costs.get("equal"))
             def equal(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("not_equal"))
             def not_equal(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__add__"))
             def __add__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__sub__"))
             def __sub__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__mul__"))
             def __mul__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__neg__"))
             def __neg__(self) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__invert__"))
             def __invert__(self) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__pow__"))
             def __pow__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__truediv__"))
             def __truediv__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__xor__"))
             def __xor__(self, other: MathExpr) -> MathExpr:
                 ...
 
+            @egraph.method(cost=costs.get("__or__"))
             def __or__(self, other: MathExpr) -> MathExpr:
                 ...
 
@@ -421,6 +432,15 @@ class GeometricAlgebra:
                 ),
                 # Euler's formula etc. require adding B^2 so the rule can get matched.
                 rule(eq(x_2).to(exp(x_1))).then(x_1 * x_1),
+                # exp(x) ** f is exp(f x)
+                birewrite(exp(x_1) ** scalar(x_2)).to(exp(scalar(x_2) * x_1)),
+                # exp(x) * exp(y) -> exp(x + y) if [x, y] = 0
+                rule(eq(x_3).to(exp(x_1) * exp(x_2))).then(x_1 * x_2, x_2 * x_1),
+                rewrite(exp(x_1) * exp(x_2)).to(
+                    exp(x_1 + x_2), eq(x_1 * x_2).to(x_2 * x_1)
+                ),
+                # TODO: Add more general BCH case, might require adding (infinite) sum
+                # exp(x) * exp(y) = exp(X + Y + [X, Y]/2 + [X, [X, Y]]/12 + ...)
             )
 
         def register_scalar(medium=True):
@@ -741,6 +761,8 @@ class GeometricAlgebra:
                 rewrite(diff(sinh(x_1), x_2)).to(cosh(x_1) * diff(x_1, x_2)),
                 # cosh(x)
                 rewrite(diff(cosh(x_1), x_2)).to(sinh(x_1) * diff(x_1, x_2)),
+                # exp(x)
+                rewrite(diff(exp(x_1), x_2)).to(exp(x_1) * diff(x_1, x_2)),
                 # reverse
                 rewrite(diff(~x_1, x_2)).to(~diff(x_1, x_2)),
                 # negative
