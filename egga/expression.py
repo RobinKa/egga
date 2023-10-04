@@ -46,6 +46,14 @@ class Expression(Protocol):
         ...
 
     @staticmethod
+    def grade_involution(other: Expression) -> Expression:
+        ...
+
+    @staticmethod
+    def clifford_conjugation(other: Expression) -> Expression:
+        ...
+
+    @staticmethod
     def inverse(other: Expression) -> Expression:
         ...
 

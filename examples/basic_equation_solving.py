@@ -18,4 +18,6 @@ rhs = -e_0
 # Make LHS equal to RHS
 ga.egraph.register(union(lhs).with_(rhs))
 
-assert str(simplify(ga, x)) == str(ga.expr_cls.e("0"))
+solved = simplify(ga, x)
+print("X:", solved)
+assert str(solved) == str(ga.expr_cls.e("0"))
