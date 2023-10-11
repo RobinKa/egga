@@ -3,11 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
 from itertools import combinations
-from typing import Dict, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 from egglog import (
     EGraph,
     Expr,
+    Fact,
     String,
     StringLike,
     egraph,
@@ -18,7 +19,6 @@ from egglog import (
     i64Like,
     rewrite,
     rule,
-    set_,
     union,
     var,
     vars_,
@@ -47,6 +47,71 @@ class GeometricAlgebraRulesets:
     full: egglog_egraph.Ruleset
     medium: egglog_egraph.Ruleset
     fast: egglog_egraph.Ruleset
+
+
+def _maybe_inverse(
+    m: type[Expression], x: Expression, dims: int
+) -> Tuple[List[Expression], List[Fact], Expression]:
+    clifford_conjugation = m.clifford_conjugation
+    grade_involution = m.grade_involution
+    scalar_literal = m.scalar_literal
+    select_grade = m.select_grade
+
+    x_conj = clifford_conjugation(x)
+    x_x_conj = x * x_conj
+    x_conj_rev_x_x_conj = x_conj * ~x_x_conj
+    x_x_conj_rev_x_x_conj = x * x_conj_rev_x_x_conj
+
+    if dims == 0:
+        numerator = scalar_literal(1.0)
+    elif dims == 1:
+        numerator = grade_involution(x)
+    elif dims == 2:
+        numerator = x_conj
+    elif dims == 3:
+        numerator = x_conj * ~x_x_conj
+    elif dims == 4:
+        numerator = x_conj * (
+            x_x_conj
+            - scalar_literal(2.0)
+            # Invert sign of grade 3 and 4 parts
+            # TODO: is there a more efficient way?
+            * (
+                select_grade(x_x_conj, scalar_literal(3.0))
+                + select_grade(x_x_conj, scalar_literal(4.0))
+            )
+        )
+    elif dims == 5:
+        numerator = x_conj_rev_x_x_conj * (
+            x_x_conj_rev_x_x_conj
+            - scalar_literal(2.0)
+            # Invert sign of grade 1 and 4 parts
+            # TODO: is there a more efficient way?
+            * (
+                select_grade(
+                    x_x_conj_rev_x_x_conj,
+                    scalar_literal(1.0),
+                )
+                + select_grade(
+                    x_x_conj_rev_x_x_conj,
+                    scalar_literal(4.0),
+                )
+            )
+        )
+    else:
+        raise NotImplementedError("Unreachable")
+
+    denominator = x * numerator
+    dependencies = [denominator]
+
+    scalar_divisor = var("scalar_divisor", f64)
+    has_inverse = [
+        eq(denominator).to(scalar_literal(scalar_divisor)),
+        _not_close(scalar_divisor, 0.0),
+    ]
+    inverse_x = numerator * (scalar_literal(f64(1.0) / scalar_divisor))
+
+    return dependencies, has_inverse, inverse_x
 
 
 @dataclass
@@ -262,13 +327,10 @@ class GeometricAlgebra:
                 egraph.register(
                     # Comm
                     rewrite(x_1 + x_2).to(x_2 + x_1),
-                    # Assoc
-                    # rewrite(x_1 + (x_2 + x_3)).to((x_1 + x_2) + x_3),
                 )
             if full:
                 egraph.register(
                     # Assoc
-                    # rewrite((x_1 + x_2) + x_3).to(x_1 + (x_2 + x_3)),
                     birewrite(x_1 + (x_2 + x_3)).to((x_1 + x_2) + x_3),
                 )
 
@@ -372,7 +434,7 @@ class GeometricAlgebra:
         def register_division(medium=True):
             egraph.register(
                 # / is syntactic sugar for multiplication by inverse
-                birewrite(x_1 / x_2).to(x_1 * inverse(x_2)),
+                rewrite(x_1 / x_2).to(x_1 * inverse(x_2)),
                 # Inverse of non-zero scalar
                 rewrite(inverse(scalar_literal(f_1))).to(
                     scalar_literal(f64(1.0) / f_1), _not_close(f_1, 0.0)
@@ -382,125 +444,41 @@ class GeometricAlgebra:
             )
 
             if full_inverse:
-                dims = len(signature)
-
-                # TODO: 5 dim case of Hitzer inverse gives contradictions?
-                # if dims > 5:
-                #if dims > 4:
-
-                # # Shirokov inverse https://arxiv.org/abs/2005.04015 Theorem 4
-                n = 2 ** ((dims + 1) // 2)
-                u = x_1
-                for k in range(1, n):
-                    c = scalar_literal(n / k) * select_grade(u, scalar_literal(0.0))
-                    u_minus_c = u - c
-                    u = x_1 * u_minus_c
-
-                # As soon as u is a scalar, we can calculate an inverse
-                # TODO: might be missing some scalar factors on early
-                # termination
-                egraph.register(
-                    rule(eq(x_2).to(inverse(x_1))).then(u),
-                    rewrite(inverse(x_1)).to(
-                        u_minus_c * scalar_literal(f64(1.0) / f_1),
-                        eq(u).to(scalar_literal(f_1)),
-                        _not_close(f_1, 0.0),
-                    ),
-                )
-
-                """
-                - Example
-                dims = 2
-                n = 2
-                u = e_1 + e_2
-                
-                -- Iter k=1
-                c = 0
-                u_minus_c = e_1 + e_2
-                u = (e_1 + e_2) * (e_1 + e_2) = 2
-
-                -- Result
-                inv = u_minus_c / u = (e_1 + e_2) / 2
-                """
-                #else:
-                # Closed form inverses (https://dx.doi.org/10.1016/j.amc.2017.05.027)
-                # More optimized forms from clifford (https://github.com/pygae/clifford).
-                # TODO: Might be able to pick lower dimension ones depending
-                # on which basis vectors are present?
                 for dims in range(len(signature) + 1):
-                    x_1_conj = clifford_conjugation(x_1)
-                    x_1_x_1_conj = x_1 * x_1_conj
-                    x_1_conj_rev_x_1_x_1_conj = x_1_conj * ~x_1_x_1_conj
-                    x_1_x_1_conj_rev_x_1_x_1_conj = x_1 * x_1_conj_rev_x_1_x_1_conj
-
-                    if dims == 0:
-                        numerator = scalar_literal(1.0)
-                    elif dims == 1:
-                        numerator = grade_involution(x_1)
-                    elif dims == 2:
-                        numerator = x_1_conj
-                    elif dims == 3:
-                        numerator = x_1_conj * ~x_1_x_1_conj
-                    elif dims == 4:
-                        numerator = x_1_conj * (
-                            x_1_x_1_conj
-                            - scalar_literal(2.0)
-                            # Invert sign of grade 3 and 4 parts
-                            # TODO: is there a more efficient way?
-                            * (
-                                select_grade(x_1_x_1_conj, scalar_literal(3.0))
-                                + select_grade(x_1_x_1_conj, scalar_literal(4.0))
-                            )
-                        )
-                    elif len(signature) == 5:
-                        numerator = x_1_conj_rev_x_1_x_1_conj * (
-                            x_1_x_1_conj_rev_x_1_x_1_conj
-                            - scalar_literal(2.0)
-                            # Invert sign of grade 1 and 4 parts
-                            # TODO: is there a more efficient way?
-                            * (
-                                select_grade(
-                                    x_1_x_1_conj_rev_x_1_x_1_conj,
-                                    scalar_literal(1.0),
-                                )
-                                + select_grade(
-                                    x_1_x_1_conj_rev_x_1_x_1_conj,
-                                    scalar_literal(4.0),
-                                )
-                            )
-                        )
-                    else:
-                        raise NotImplementedError("Unreachable")
-
-                    denominator = x_1 * numerator
+                    deps, x_1_has_inverse, x_1_inverse = _maybe_inverse(
+                        m=MathExpr, x=x_1, dims=dims
+                    )
 
                     egraph.register(
-                        rule(eq(x_2).to(inverse(x_1))).then(denominator),
-                        rewrite(inverse(x_1)).to(
-                            numerator * (scalar_literal(f64(1.0) / f_1)),
-                            eq(denominator).to(
-                                scalar_literal(f_1),
-                            ),
-                            _not_close(f_1, 0.0),
-                        ),
+                        rule(eq(x_2).to(inverse(x_1))).then(*deps),
+                        rewrite(inverse(x_1)).to(x_1_inverse, *x_1_has_inverse),
                     )
 
             # Multiplicative equation solving with inverses
             if eq_solve:
-                egraph.register(
-                    rule(eq(x_3).to(x_1 * x_2)).then(
-                        x_1 * x_1 != scalar_literal(0.0),
-                        x_2 * x_2 != scalar_literal(0.0),
-                    ),
-                    # Left inverse: x_3 = x_1 * x_2 -> inv(x_1) * x_3 = x_2
-                    rule(eq(x_3).to(x_1 * x_2), x_1 * x_1 != scalar_literal(0.0)).then(
-                        union(x_2).with_(inverse(x_1) * x_3)
-                    ),
-                    # Right inverse: x_3 = x_1 * x_2 -> x_3 * inv(x_2) = x_1
-                    rule(eq(x_3).to(x_1 * x_2), x_2 * x_2 != scalar_literal(0.0)).then(
-                        union(x_1).with_(x_3 * inverse(x_2))
-                    ),
-                )
+                for dims in range(len(signature) + 1):
+                    deps_1, x_1_has_inverse, x_1_inverse = _maybe_inverse(
+                        m=MathExpr, x=x_1, dims=dims
+                    )
+                    deps_2, x_2_has_inverse, x_2_inverse = _maybe_inverse(
+                        m=MathExpr, x=x_2, dims=dims
+                    )
+
+                    egraph.register(
+                        # x_3 = x_1 * x_2: Figure out if x_1 and x_2 have inverses
+                        rule(eq(x_3).to(x_1 * x_2)).then(
+                            *deps_1,
+                            *deps_2,
+                        ),
+                        # Left inverse: inv(x_1) * x_3 = x_2
+                        rule(eq(x_3).to(x_1 * x_2), *x_1_has_inverse).then(
+                            union(x_2).with_(x_1_inverse * x_3),
+                        ),
+                        # Right inverse: x_3 * inv(x_2) = x_1
+                        rule(eq(x_3).to(x_1 * x_2), *x_2_has_inverse).then(
+                            union(x_1).with_(x_3 * x_2_inverse),
+                        ),
+                    )
 
         def register_pow(medium=True):
             egraph.register(
