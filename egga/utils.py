@@ -61,7 +61,7 @@ def run_scheduled(
         # Medium or full step
         do_step(
             ruleset=ga.rulesets.full
-            if step % options.full_interval != 0
+            if step % options.full_interval == 0
             else ga.rulesets.medium,
             step_limit=1,
         )
