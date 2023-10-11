@@ -441,6 +441,8 @@ class GeometricAlgebra:
                 ),
                 # Inverse of basis vector
                 rewrite(inverse(e(s_1))).to(e(s_1) * inverse(e(s_1) * e(s_1))),
+                # Inverse of product is product of inverses in reverse order
+                rewrite(inverse(x_1 * x_2)).to(inverse(x_2) * inverse(x_1)),
             )
 
             if full_inverse:
