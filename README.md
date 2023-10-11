@@ -99,42 +99,44 @@ The [/examples](examples) as well as the [/tests](tests) directories contain mor
 
 ### Operators
 
-| Code         | Description                                                                           |
-| ------------ | ------------------------------------------------------------------------------------- |
-| `x_1 + x_2`  | Addition of x_1 and x_2                                                               |
-| `x_1 - x_2`  | Subtraction of x_1 and x_2                                                            |
-| `x_1 * x_2`  | Multiplication of x_1 and x_2 (aka the Geometric Product)                             |
-| `x_1 ^ x_2`  | Wedge / exterior / outer product of x_1 and x_2                                       |
-| `x_1 \| x_2` | Inner ("fat dot") product of x_1 and x_2                                              |
-| `-x_1`       | Negation of x_1                                                                       |
-| `~x_1`       | Reversion of x_1                                                                      |
-| `x_1 ** x_2` | x_1 to the power of x_2                                                               |
-| `x_1 / x_2`  | x_1 divided by x_2 (more generally, x_1 right-multiplied by the right inverse of x_2) |
+| Code         | Description                                                                     |
+| ------------ | ------------------------------------------------------------------------------- |
+| `x_1 + x_2`  | Addition of x_1 and x_2                                                         |
+| `x_1 - x_2`  | Subtraction of x_1 and x_2                                                      |
+| `x_1 * x_2`  | Multiplication of x_1 and x_2 (aka the Geometric Product)                       |
+| `x_1 ^ x_2`  | Wedge / exterior / outer product of x_1 and x_2                                 |
+| `x_1 \| x_2` | Inner ("fat dot") product of x_1 and x_2                                        |
+| `-x_1`       | Negation of x_1                                                                 |
+| `~x_1`       | Reversion of x_1                                                                |
+| `x_1 ** x_2` | x_1 to the power of x_2                                                         |
+| `x_1 / x_2`  | x_1 divided by x_2 (more generally, x_1 right-multiplied by the inverse of x_2) |
 
 ### Functions
 
-| Code                     | Description                                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `inverse(x)`             | Right-multiplicative inverse of x                                                                    |
-| `scalar(x)`              | Mark x as a scalar                                                                                   |
-| `scalar_literal(f)`      | Create a scalar constant                                                                             |
-| `scalar_variable(s)`     | Create a scalar variable                                                                             |
-| `e(s)`                   | Basis vector                                                                                         |
-| `e2(s_1, s_2)`           | Basis bivector                                                                                       |
-| `e3(s_1, s_2, s_3)`      | Basis trivector                                                                                      |
-| `variable(s)`            | Create a variable                                                                                    |
-| `cos(x)`                 | Cos of x                                                                                             |
-| `sin(x)`                 | Sin of x                                                                                             |
-| `cosh(x)`                | Cosh of x                                                                                            |
-| `sinh(x)`                | Sinh of x                                                                                            |
-| `exp(x)`                 | Exponential function of x                                                                            |
-| `grade(x)`               | Grade of x                                                                                           |
-| `mix_grades(x_1, x_2)`   | Represents the mixture of two grades. If x_1 and x_2 are the same, this will be simplified to `x_1`. |
-| `select_grade(x_1, x_2)` | Selects the grade x_2 part of x_1                                                                    |
-| `abs(x)`                 | Absolute value of x                                                                                  |
-| `rotor(x_1, x_2)`        | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                        |
-| `sandwich(x_1, x_2)`     | Shorthand for `x_1 * x_2 * ~x_1`                                                                     |
-| `diff(x_1, x_2)`         | Derivative of x_1 with respect to x_2                                                                |
+| Code                      | Description                                                                                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `inverse(x)`              | Multiplicative inverse of x                                                                          |
+| `grade_involution(x)`     | [Grade involution](https://en.wikipedia.org/wiki/Paravector#Grade_automorphism) of x                 |
+| `clifford_conjugation(x)` | [Clifford conjugate](https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation) of x             |
+| `scalar(x)`               | Mark x as a scalar                                                                                   |
+| `scalar_literal(f)`       | Create a scalar constant                                                                             |
+| `scalar_variable(s)`      | Create a scalar variable                                                                             |
+| `e(s)`                    | Basis vector                                                                                         |
+| `e2(s_1, s_2)`            | Basis bivector                                                                                       |
+| `e3(s_1, s_2, s_3)`       | Basis trivector                                                                                      |
+| `variable(s)`             | Create a variable                                                                                    |
+| `cos(x)`                  | Cos of x                                                                                             |
+| `sin(x)`                  | Sin of x                                                                                             |
+| `cosh(x)`                 | Cosh of x                                                                                            |
+| `sinh(x)`                 | Sinh of x                                                                                            |
+| `exp(x)`                  | Exponential function of x                                                                            |
+| `grade(x)`                | Grade of x                                                                                           |
+| `mix_grades(x_1, x_2)`    | Represents the mixture of two grades. If x_1 and x_2 are the same, this will be simplified to `x_1`. |
+| `select_grade(x_1, x_2)`  | Selects the grade x_2 part of x_1                                                                    |
+| `abs(x)`                  | Absolute value of x                                                                                  |
+| `rotor(x_1, x_2)`         | Shorthand for `exp(scalar_literal(-0.5) * scalar(x_2) * x_1)`                                        |
+| `sandwich(x_1, x_2)`      | Shorthand for `x_1 * x_2 * ~x_1`                                                                     |
+| `diff(x_1, x_2)`          | Derivative of x_1 with respect to x_2                                                                |
 
 ### Unsupported but exists, might or might not work
 
