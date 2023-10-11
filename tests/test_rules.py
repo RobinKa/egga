@@ -13,7 +13,7 @@ from egga.utils import (
 )
 from itertools import combinations
 
-ga = GeometricAlgebra([0.0, 1.0, 1.0, 1.0, -1.0])
+ga = GeometricAlgebra([0.0, 1.0, 1.0, 1.0, -1.0], eq_solve=False, full_inverse=True)
 E = ga.expr_cls
 
 e_0, e_1, e_2, e_3, e_4 = ga.basis_vectors
