@@ -18,25 +18,31 @@ jobs:
   build-test-publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: earthly/actions-setup@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          version: v0.7.19
-      - uses: actions/checkout@v2
-      - name: Put back the git branch into git (Earthly uses it for tagging)
+          python-version: "3.12"
+      - name: Install uv
+        run: python -m pip install uv==0.11.0
+      - name: Install just
         run: |
-          branch=""
-          if [ -n "$GITHUB_HEAD_REF" ]; then
-            branch="$GITHUB_HEAD_REF"
-          else
-            branch="${GITHUB_REF##*/}"
-          fi
-          git checkout -b "$branch" || true
+          uv tool install rust-just==1.50.0
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install dependencies
+        run: just sync-frozen
       - name: Run tests
-        run: earthly +test
+        run: just test
       - name: Run examples
-        run: earthly +test-examples
+        run: just examples
+      - name: Build package
+        run: just build
       - name: Publish test
-        run: earthly --secret PYPI_TOKEN=${{ secrets.test_pypi_password }} --ci +publish --REPOSITORY=testpypi
+        if: github.event_name != 'pull_request'
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.test_pypi_password }}
+        run: just publish-test
       - name: Publish
-        if: contains(github.ref, 'master')
-        run: earthly --secret PYPI_TOKEN=${{ secrets.pypi_password }} --ci +publish --REPOSITORY=pypi
+        if: github.ref == 'refs/heads/master'
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.pypi_password }}
+        run: just publish

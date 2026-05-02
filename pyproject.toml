@@ -1,13 +1,11 @@
-[tool.poetry]
+[project]
 name = "egga"
 version = "0.1.9"
 description = "Symbolic Geometric Algebra with E-Graphs "
-authors = ["Robin Kahlow <tora@warlock.ai>"]
 readme = "README.md"
-packages = [{ include = "egga" }]
-homepage = "https://github.com/RobinKa/egga"
-repository = "https://github.com/RobinKa/egga"
-license = "MIT"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Robin Kahlow", email = "tora@warlock.ai" }]
 keywords = [
     "geometric-algebra",
     "clifford-algebra",
@@ -42,15 +40,23 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+dependencies = [
+    "egglog>=0.7.0,<0.8.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-egglog = "^0.7.0"
+[project.urls]
+Homepage = "https://github.com/RobinKa/egga"
+Repository = "https://github.com/RobinKa/egga"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-pytest-xdist = "^3.3.1"
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0,<8.0.0",
+    "pytest-xdist>=3.3.1,<4.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["egga"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

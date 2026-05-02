@@ -26,6 +26,17 @@ Supports Python 3.8 and higher.
 
 `pip install egga`
 
+## Development
+
+This repo uses [uv](https://docs.astral.sh/uv/) for dependency management and
+[just](https://github.com/casey/just) as the command runner.
+
+```bash
+uv sync
+uv tool install rust-just
+just check
+```
+
 ## Usage
 
 The first step is to create a `GeometricAlgebra` object with a given signature.
