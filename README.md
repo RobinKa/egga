@@ -22,7 +22,7 @@ Based on the [Python bindings](https://github.com/metadsl/egglog-python) for [eg
 
 ## Setup
 
-Supports Python 3.8 and higher.
+Supports Python 3.11 and higher.
 
 `pip install egga`
 

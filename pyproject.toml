@@ -3,7 +3,7 @@ name = "egga"
 version = "0.1.9"
 description = "Symbolic Geometric Algebra with E-Graphs "
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Robin Kahlow", email = "tora@warlock.ai" }]
 keywords = [
@@ -22,10 +22,9 @@ classifiers = [
     "Development Status :: 3 - Alpha",
 
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
 
     "Intended Audience :: Education",
@@ -41,7 +40,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "egglog>=0.7.0,<0.8.0",
+    "egglog==13.1.0",
 ]
 
 [project.urls]
@@ -50,8 +49,9 @@ Repository = "https://github.com/RobinKa/egga"
 
 [dependency-groups]
 dev = [
-    "pytest>=7.4.0,<8.0.0",
-    "pytest-xdist>=3.3.1,<4.0.0",
+    "pytest>=9.0.3,<10.0.0",
+    "pytest-xdist>=3.8.0,<4.0.0",
+    "ruff>=0.15.12",
 ]
 
 [tool.hatch.build.targets.wheel]

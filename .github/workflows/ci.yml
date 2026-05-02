@@ -30,6 +30,10 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Install dependencies
         run: just sync-frozen
+      - name: Check formatting
+        run: just format-check
+      - name: Run lint
+        run: just lint
       - name: Run tests
         run: just test
       - name: Run examples

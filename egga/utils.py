@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable, Literal, Optional, Union
 
-from egglog import Fact, egraph, eq, run
+from egglog import Fact, Ruleset, eq, run
 
 from egga.expression import Expression
 from egga.geometric_algebra import GeometricAlgebra
@@ -9,14 +9,14 @@ from egga.geometric_algebra import GeometricAlgebra
 
 @dataclass
 class RunRulesetOptions:
-    ruleset: Union[Literal["fast", "medium", "full"], egraph.Ruleset] = "full"
+    ruleset: Union[Literal["fast", "medium", "full"], Ruleset] = "full"
     limit: int = 10
     until: Optional[Fact] = None
 
 
 def run_ruleset(ga: GeometricAlgebra, options: RunRulesetOptions = RunRulesetOptions()):
     if isinstance(options.ruleset, str):
-        ruleset = ga.rulesets.__dict__[options.ruleset]
+        ruleset = getattr(ga.rulesets, options.ruleset)
     else:
         ruleset = options.ruleset
 
@@ -25,7 +25,7 @@ def run_ruleset(ga: GeometricAlgebra, options: RunRulesetOptions = RunRulesetOpt
             run(
                 ruleset,
                 *([options.until] if options.until is not None else []),
-            ).saturate()
+            )
         )
 
 
@@ -41,7 +41,7 @@ class RunScheduledOptions:
 def run_scheduled(
     ga: GeometricAlgebra, options: RunScheduledOptions = RunScheduledOptions()
 ):
-    def do_step(ruleset: egraph.Ruleset, step_limit: int):
+    def do_step(ruleset: Ruleset, step_limit: int):
         run_ruleset(
             ga,
             options=RunRulesetOptions(
@@ -129,7 +129,7 @@ def check_equality(
     check_passed = True
     try:
         check_fn(predicate)
-    except:
+    except Exception:
         check_passed = False
 
     ga.egraph.pop()

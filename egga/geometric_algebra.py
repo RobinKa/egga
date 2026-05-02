@@ -6,30 +6,30 @@ from itertools import combinations
 from typing import Dict, List, Optional, Tuple, Type
 
 from egglog import (
+    birewrite,
     EGraph,
     Expr,
     Fact,
     String,
     StringLike,
-    egraph,
     eq,
     f64,
     f64Like,
+    function,
     i64,  # noqa: F401
     i64Like,
+    method,
     rewrite,
+    RewriteOrRule,
+    ruleset,
+    Ruleset,
     rule,
     union,
     var,
     vars_,
 )
-from egglog import (
-    egraph as egglog_egraph,
-)
 
 from egga.expression import Expression
-
-birewrite = egraph.birewrite
 
 
 def _close(a: f64Like, b: f64Like, eps: float = 1e-3):
@@ -44,9 +44,9 @@ def _not_close(a: f64Like, b: f64Like, eps: float = 1e-3):
 
 @dataclass
 class GeometricAlgebraRulesets:
-    full: egglog_egraph.Ruleset
-    medium: egglog_egraph.Ruleset
-    fast: egglog_egraph.Ruleset
+    full: Ruleset
+    medium: Ruleset
+    fast: Ruleset
 
 
 def _maybe_inverse(
@@ -142,167 +142,132 @@ class GeometricAlgebra:
 
         egraph = EGraph()
 
-        @egraph.class_
         class MathExpr(Expr):
-            @egraph.method(cost=costs.get("equal"))
-            def equal(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("equal"))
+            def equal(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("not_equal"))
-            def not_equal(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("not_equal"))
+            def not_equal(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__add__"))
-            def __add__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__add__"))
+            def __add__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__sub__"))
-            def __sub__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__sub__"))
+            def __sub__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__mul__"))
-            def __mul__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__mul__"))
+            def __mul__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__neg__"))
-            def __neg__(self) -> MathExpr:
-                ...
+            @method(cost=costs.get("__neg__"))
+            def __neg__(self) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__invert__"))
-            def __invert__(self) -> MathExpr:
-                ...
+            @method(cost=costs.get("__invert__"))
+            def __invert__(self) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__pow__"))
-            def __pow__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__pow__"))
+            def __pow__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__truediv__"))
-            def __truediv__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__truediv__"))
+            def __truediv__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__xor__"))
-            def __xor__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__xor__"))
+            def __xor__(self, other: MathExpr) -> MathExpr: ...
 
-            @egraph.method(cost=costs.get("__or__"))
-            def __or__(self, other: MathExpr) -> MathExpr:
-                ...
+            @method(cost=costs.get("__or__"))
+            def __or__(self, other: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("grade_involution"))
-        def grade_involution(other: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("grade_involution"))
+        def grade_involution(other: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("clifford_conjugation"))
-        def clifford_conjugation(other: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("clifford_conjugation"))
+        def clifford_conjugation(other: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("inverse"))
-        def inverse(other: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("inverse"))
+        def inverse(other: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("boolean"))
-        def boolean(b: i64Like) -> MathExpr:
-            ...
+        @function(cost=costs.get("boolean"))
+        def boolean(b: i64Like) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("scalar"))
-        def scalar(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("scalar"))
+        def scalar(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("scalar_literal"))
-        def scalar_literal(value: f64Like) -> MathExpr:
-            ...
+        @function(cost=costs.get("scalar_literal"))
+        def scalar_literal(value: f64Like) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("scalar_variable"))
-        def scalar_variable(value: StringLike) -> MathExpr:
-            ...
+        @function(cost=costs.get("scalar_variable"))
+        def scalar_variable(value: StringLike) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("e"))
-        def e(s: StringLike) -> MathExpr:
-            ...
+        @function(cost=costs.get("e"))
+        def e(s: StringLike) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("e2"))
-        def e2(s_1: StringLike, s_2: StringLike) -> MathExpr:
-            ...
+        @function(cost=costs.get("e2"))
+        def e2(s_1: StringLike, s_2: StringLike) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("e3"))
-        def e3(s_1: StringLike, s_2: StringLike, s_3: StringLike) -> MathExpr:
-            ...
+        @function(cost=costs.get("e3"))
+        def e3(s_1: StringLike, s_2: StringLike, s_3: StringLike) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("variable"))
-        def variable(name: StringLike) -> MathExpr:
-            ...
+        @function(cost=costs.get("variable"))
+        def variable(name: StringLike) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("cos"))
-        def cos(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("cos"))
+        def cos(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("sin"))
-        def sin(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("sin"))
+        def sin(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("cosh"))
-        def cosh(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("cosh"))
+        def cosh(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("sinh"))
-        def sinh(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("sinh"))
+        def sinh(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("exp"))
-        def exp(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("exp"))
+        def exp(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("grade"))
-        def grade(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("grade"))
+        def grade(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("mix_grades"))
-        def mix_grades(a: MathExpr, b: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("mix_grades"))
+        def mix_grades(a: MathExpr, b: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("select_grade"))
-        def select_grade(value: MathExpr, grade: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("select_grade"))
+        def select_grade(value: MathExpr, grade: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("abs"))
-        def abs_(value: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("abs"))
+        def abs_(value: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("rotor"))
-        def rotor(basis_blade: MathExpr, angle: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("rotor"))
+        def rotor(basis_blade: MathExpr, angle: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("sandwich"))
-        def sandwich(r: MathExpr, x: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("sandwich"))
+        def sandwich(r: MathExpr, x: MathExpr) -> MathExpr: ...
 
-        @egraph.function(cost=costs.get("diff"))
-        def diff(value: MathExpr, wrt: MathExpr) -> MathExpr:
-            ...
+        @function(cost=costs.get("diff"))
+        def diff(value: MathExpr, wrt: MathExpr) -> MathExpr: ...
 
-        MathExpr.grade_involution = grade_involution
-        MathExpr.clifford_conjugation = clifford_conjugation
-        MathExpr.inverse = inverse
-        MathExpr.boolean = boolean
-        MathExpr.scalar = scalar
-        MathExpr.scalar_literal = scalar_literal
-        MathExpr.scalar_variable = scalar_variable
-        MathExpr.e = e
-        MathExpr.e2 = e2
-        MathExpr.e3 = e3
-        MathExpr.variable = variable
-        MathExpr.cos = cos
-        MathExpr.sin = sin
-        MathExpr.cosh = cosh
-        MathExpr.sinh = sinh
-        MathExpr.exp = exp
-        MathExpr.grade = grade
-        MathExpr.mix_grades = mix_grades
-        MathExpr.select_grade = select_grade
-        MathExpr.abs = abs_
-        MathExpr.rotor = rotor
-        MathExpr.sandwich = sandwich
-        MathExpr.diff = diff
+        MathExpr.grade_involution = staticmethod(grade_involution)
+        MathExpr.clifford_conjugation = staticmethod(clifford_conjugation)
+        MathExpr.inverse = staticmethod(inverse)
+        MathExpr.boolean = staticmethod(boolean)
+        MathExpr.scalar = staticmethod(scalar)
+        MathExpr.scalar_literal = staticmethod(scalar_literal)
+        MathExpr.scalar_variable = staticmethod(scalar_variable)
+        MathExpr.e = staticmethod(e)
+        MathExpr.e2 = staticmethod(e2)
+        MathExpr.e3 = staticmethod(e3)
+        MathExpr.variable = staticmethod(variable)
+        MathExpr.cos = staticmethod(cos)
+        MathExpr.sin = staticmethod(sin)
+        MathExpr.cosh = staticmethod(cosh)
+        MathExpr.sinh = staticmethod(sinh)
+        MathExpr.exp = staticmethod(exp)
+        MathExpr.grade = staticmethod(grade)
+        MathExpr.mix_grades = staticmethod(mix_grades)
+        MathExpr.select_grade = staticmethod(select_grade)
+        MathExpr.abs = staticmethod(abs_)
+        MathExpr.rotor = staticmethod(rotor)
+        MathExpr.sandwich = staticmethod(sandwich)
+        MathExpr.diff = staticmethod(diff)
 
         x_1, x_2, x_3 = vars_("x_1 x_2 x_3", MathExpr)
         f_1, f_2 = vars_("f_1 f_2", f64)
@@ -311,36 +276,46 @@ class GeometricAlgebra:
         orig_rewrite = rewrite
         orig_birewrite = birewrite
         orig_rule = rule
+        active_ruleset = None
 
         def set_active_ruleset(ruleset):
+            nonlocal active_ruleset
             global rewrite, birewrite, rule
+            active_ruleset = ruleset
             rewrite = partial(orig_rewrite, ruleset=ruleset)
             birewrite = partial(orig_birewrite, ruleset=ruleset)
             rule = partial(orig_rule, ruleset=ruleset)
 
+        def register(*items):
+            for item in items:
+                if isinstance(item, RewriteOrRule):
+                    active_ruleset.register(item)
+                else:
+                    egraph.register(item)
+
         def register_addition(full=True, medium=True):
-            egraph.register(
+            register(
                 # Identity
                 rewrite(x_1 + scalar_literal(0.0)).to(x_1),
             )
             if medium:
-                egraph.register(
+                register(
                     # Comm
                     rewrite(x_1 + x_2).to(x_2 + x_1),
                 )
             if full:
-                egraph.register(
+                register(
                     # Assoc
                     birewrite(x_1 + (x_2 + x_3)).to((x_1 + x_2) + x_3),
                 )
 
             if eq_solve:
-                egraph.register(
+                register(
                     rule(eq(x_3).to(x_1 + x_2)).then(union(x_1).with_(x_3 - x_2)),
                 )
 
         def register_subtraction(medium=True):
-            egraph.register(
+            register(
                 # Sub self is zero
                 rewrite(x_1 - x_1).to(scalar_literal(0.0)),
                 # (a + b) - (a + c) = b - c
@@ -348,13 +323,13 @@ class GeometricAlgebra:
             )
 
             if medium:
-                egraph.register(
+                register(
                     # Add negation is subtraction
                     birewrite(x_1 + -x_2).to(x_1 - x_2),
                 )
 
         def register_negation():
-            egraph.register(
+            register(
                 # Involute
                 rewrite(--x_1).to(x_1),
                 # This makes things blow up
@@ -362,7 +337,7 @@ class GeometricAlgebra:
             )
 
         def register_multiplication(full=True, medium=True):
-            egraph.register(
+            register(
                 # Identity
                 rewrite(scalar_literal(1.0) * x_1).to(x_1),
                 # Zero
@@ -380,7 +355,7 @@ class GeometricAlgebra:
             )
 
             if medium:
-                egraph.register(
+                register(
                     # Scalar comm
                     birewrite(x_1 * scalar(x_2)).to(scalar(x_2) * x_1),
                     # Assoc
@@ -397,13 +372,13 @@ class GeometricAlgebra:
                 pass
 
         def register_wedge(medium=True):
-            egraph.register(
+            register(
                 birewrite(x_1 ^ x_2).to(
                     select_grade(x_1 * x_2, grade(x_1) + grade(x_2)),
                 ),
             )
             if medium:
-                egraph.register(
+                register(
                     # TODO: Can we do without these rules?
                     # Without them, (e1 + e12) ^ e12 = e12 fails.
                     # Assoc
@@ -415,13 +390,13 @@ class GeometricAlgebra:
                 )
 
         def register_inner(medium=True):
-            egraph.register(
+            register(
                 birewrite(x_1 | x_2).to(
                     select_grade(x_1 * x_2, abs_(grade(x_1) - grade(x_2))),
                 ),
             )
             if medium:
-                egraph.register(
+                register(
                     # TODO: Can we do without these rules?
                     # Assoc
                     birewrite(x_1 | (x_2 | x_3)).to((x_1 | x_2) | x_3),
@@ -432,7 +407,7 @@ class GeometricAlgebra:
                 )
 
         def register_division(medium=True):
-            egraph.register(
+            register(
                 # / is syntactic sugar for multiplication by inverse
                 rewrite(x_1 / x_2).to(x_1 * inverse(x_2)),
                 # Inverse of non-zero scalar
@@ -451,7 +426,7 @@ class GeometricAlgebra:
                         m=MathExpr, x=x_1, dims=dims
                     )
 
-                    egraph.register(
+                    register(
                         rule(eq(x_2).to(inverse(x_1))).then(*deps),
                         rewrite(inverse(x_1)).to(x_1_inverse, *x_1_has_inverse),
                     )
@@ -466,7 +441,7 @@ class GeometricAlgebra:
                         m=MathExpr, x=x_2, dims=dims
                     )
 
-                    egraph.register(
+                    register(
                         # x_3 = x_1 * x_2: Figure out if x_1 and x_2 have inverses
                         rule(eq(x_3).to(x_1 * x_2)).then(
                             *deps_1,
@@ -483,20 +458,20 @@ class GeometricAlgebra:
                     )
 
         def register_pow(medium=True):
-            egraph.register(
+            register(
                 # pow zero
                 rewrite(x_1 ** scalar_literal(0.0)).to(scalar_literal(1.0)),
                 # pow one
                 rewrite(x_1 ** scalar_literal(1.0)).to(x_1),
             )
             if medium:
-                egraph.register(
+                register(
                     # expand pow 2 to mul
                     birewrite(x_1 ** scalar_literal(2.0)).to(x_1 * x_1),
                 )
 
         def register_exp(medium=True):
-            egraph.register(
+            register(
                 # B^2 = -1
                 birewrite(exp(scalar(x_2) * x_1)).to(
                     cos(scalar(x_2)) + x_1 * sin(scalar(x_2)),
@@ -527,7 +502,7 @@ class GeometricAlgebra:
 
         def register_scalar(medium=True):
             if medium:
-                egraph.register(
+                register(
                     birewrite(scalar_literal(f_1)).to(scalar(scalar_literal(f_1))),
                     birewrite(scalar_variable(s_1)).to(scalar(scalar_variable(s_1))),
                     birewrite(scalar_variable(s_1)).to(scalar(variable(s_1))),
@@ -578,7 +553,7 @@ class GeometricAlgebra:
             # mix_grades(grade(e1), grade(e2 + e3)) ->
             # mix_grades(grade(e1), mix_grades(grade(e2), grade(e3)))
 
-            egraph.register(
+            register(
                 # mix_grades(x, y) -> x if x == y
                 rewrite(mix_grades(x_1, x_2)).to(x_1, eq(x_1).to(x_2)),
                 # mix_grades comm
@@ -625,14 +600,14 @@ class GeometricAlgebra:
                 conds = []
                 for name_1, name_2 in combinations(basis_vector_names, 2):
                     conds.append(name_1 != name_2)
-                egraph.register(
+                register(
                     rewrite(grade(basis_blade)).to(
                         scalar_literal(float(blade_grade)), *conds
                     ),
                 )
 
             # Select grade
-            egraph.register(
+            register(
                 # select_grade(x + y, z) -> select_grade(x, z) + select_grade(y, z)
                 rewrite(select_grade(x_1 + x_2, x_3)).to(
                     select_grade(x_1, x_3) + select_grade(x_2, x_3)
@@ -654,7 +629,7 @@ class GeometricAlgebra:
 
         def register_basic_ga(medium=True):
             basis_vectors = [e(str(i)) for i in range(len(signature))]
-            egraph.register(
+            register(
                 # e_i^2 = signature[i]
                 *map(
                     lambda e, s: rewrite(e * e).to(scalar_literal(s)),
@@ -687,7 +662,7 @@ class GeometricAlgebra:
             )
 
             if medium:
-                egraph.register(
+                register(
                     # e_i e_j = -e_j e_i, i != j
                     birewrite(-e(s_1) * e(s_2)).to(e(s_2) * e(s_1), s_1 != s_2),
                     # Sandwich
@@ -699,7 +674,7 @@ class GeometricAlgebra:
             p_vectors = [e(f"{i}*") for i in range(len(signature))]
 
             if True:
-                egraph.register(
+                register(
                     # q p - p q = 1
                     *map(
                         lambda q, p, s: birewrite(q * p - p * q).to(
@@ -729,7 +704,7 @@ class GeometricAlgebra:
                     ),
                 )
 
-            egraph.register(
+            register(
                 # cutoff e_i^n = 0
                 rewrite(e(s_1) * e(s_1) * e(s_1) * e(s_1)).to(scalar_literal(0.0)),
                 # e_i e_j = e_ij
@@ -741,34 +716,34 @@ class GeometricAlgebra:
             # for i, q in enumerate(q_vectors):
             #     for j, p in enumerate(p_vectors):
             #         if i != j:
-            #             egraph.register(birewrite(q * p).to(p * q))
+            #             register(birewrite(q * p).to(p * q))
             # # q_i q_j = q_j q_i, i != j
             # for i, q_1 in enumerate(q_vectors):
             #     for j, q_2 in enumerate(q_vectors):
             #         if i != j:
-            #             egraph.register(birewrite(q_1 * q_2).to(q_2 * q_1))
+            #             register(birewrite(q_1 * q_2).to(q_2 * q_1))
             # # p_i p_j = p_j p_i, i != j
             # for i, p_1 in enumerate(p_vectors):
             #     for j, p_2 in enumerate(p_vectors):
             #         if i != j:
-            #             egraph.register(birewrite(p_1 * p_2).to(p_2 * p_1))
+            #             register(birewrite(p_1 * p_2).to(p_2 * p_1))
 
         def register_reverse(medium=True):
             if not symplectic:
-                egraph.register(
+                register(
                     rewrite(~~x_1).to(x_1),
                     rewrite(~scalar(x_1)).to(scalar(x_1)),
                     rewrite(~e(s_1)).to(e(s_1)),
                 )
 
                 if medium:
-                    egraph.register(
+                    register(
                         birewrite(~(x_1 * x_2)).to(~x_2 * ~x_1),
                         birewrite(~(x_1 + x_2)).to(~x_1 + ~x_2),
                     )
 
         def register_grade_involution():
-            egraph.register(
+            register(
                 birewrite(grade_involution(x_1 * x_2)).to(
                     grade_involution(x_1) * grade_involution(x_2)
                 ),
@@ -781,7 +756,7 @@ class GeometricAlgebra:
             )
 
         def register_clifford_conjugation():
-            egraph.register(
+            register(
                 birewrite(clifford_conjugation(x_1 * x_2)).to(
                     clifford_conjugation(x_2) * clifford_conjugation(x_1)
                 ),
@@ -796,7 +771,7 @@ class GeometricAlgebra:
             )
 
         def register_equality():
-            egraph.register(
+            register(
                 # Comm
                 birewrite(x_1.equal(x_2)).to(x_2.equal(x_1)),
                 birewrite(x_1.not_equal(x_2)).to(x_2.not_equal(x_1)),
@@ -808,7 +783,7 @@ class GeometricAlgebra:
             )
 
         def register_trigonometry():
-            egraph.register(
+            register(
                 # scalar
                 birewrite(sin(x_1)).to(scalar(sin(x_1))),
                 birewrite(cos(x_1)).to(scalar(cos(x_1))),
@@ -838,8 +813,6 @@ class GeometricAlgebra:
                 rewrite(cosh(x_2) * cosh(x_2) - sinh(x_1) * sinh(x_1)).to(
                     scalar_literal(1.0)
                 ),
-                rewrite(-sin(-x_1)).to(sin(x_1)),
-                rewrite(cos(-x_1)).to(cos(x_1)),
             )
 
         def register_diff(medium=True):
@@ -847,7 +820,7 @@ class GeometricAlgebra:
 
             if medium:
                 # Linearity
-                egraph.register(
+                register(
                     # Addition
                     birewrite(diff(x_1 + x_2, x_3)).to(diff(x_1, x_3) + diff(x_2, x_3)),
                     # Constant multiplication
@@ -859,7 +832,7 @@ class GeometricAlgebra:
                 )
 
             # Concrete derivatives
-            egraph.register(
+            register(
                 # wrt self
                 # TODO: Fix not constant condition
                 # rewrite(diff(x_1, x_1)).to(
@@ -896,9 +869,9 @@ class GeometricAlgebra:
                 rewrite(diff(x_1 * x_1, x_1)).to(scalar_literal(2.0) * x_1),
             )
 
-        full_ruleset = egraph.ruleset("full")
-        medium_ruleset = egraph.ruleset("medium")
-        fast_ruleset = egraph.ruleset("fast")
+        full_ruleset = ruleset(name="full")
+        medium_ruleset = ruleset(name="medium")
+        fast_ruleset = ruleset(name="fast")
 
         set_active_ruleset(full_ruleset)
         register_addition()
